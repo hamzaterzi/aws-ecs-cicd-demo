@@ -1,10 +1,16 @@
 version: 0.2
 
+env:
+  variables:
+    AWS_DEFAULT_REGION: eu-central-1
+    ECR_REPOSITORY_URI: 211026995015.dkr.ecr.eu-central-1.amazonaws.com/ecs-cicd-demo
+    IMAGE_TAG: latest
+
 phases:
   pre_build:
     commands:
       - echo Logging in to Amazon ECR...
-      - aws ecr get-login-password --region eu-central-1 | docker login --username AWS --password-stdin 211026995015.dkr.ecr.eu-central-1.amazonaws.com
+      - aws ecr get-login-password --region $AWS_DEFAULT_REGION | docker login --username AWS --password-stdin 211026995015.dkr.ecr.eu-central-1.amazonaws.com
 
   build:
     commands:
@@ -14,10 +20,12 @@ phases:
   post_build:
     commands:
       - echo Tagging image...
-      - docker tag ecs-cicd-demo:latest 211026995015.dkr.ecr.eu-central-1.amazonaws.com/ecs-cicd-demo:latest
+      - docker tag ecs-cicd-demo:$IMAGE_TAG $ECR_REPOSITORY_URI:$IMAGE_TAG
       - echo Pushing image...
-      - docker push 211026995015.dkr.ecr.eu-central-1.amazonaws.com/ecs-cicd-demo:latest
+      - docker push $ECR_REPOSITORY_URI:$IMAGE_TAG
+      - echo Writing imagedefinitions.json...
+      - printf '[{"name":"app","imageUri":"%s"}]' "$ECR_REPOSITORY_URI:$IMAGE_TAG" > imagedefinitions.json
 
 artifacts:
   files:
-    - '**/*'
+    - imagedefinitions.json
