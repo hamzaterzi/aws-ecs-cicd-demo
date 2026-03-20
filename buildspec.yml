@@ -15,7 +15,7 @@ phases:
   build:
     commands:
       - echo Building Docker image...
-      - docker build -t ecs-cicd-demo .
+      - docker build -t ecs-cicd-demo:$IMAGE_TAG .
 
   post_build:
     commands:
