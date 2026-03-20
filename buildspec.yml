@@ -4,15 +4,19 @@ phases:
   pre_build:
     commands:
       - echo Logging in to Amazon ECR...
+      - aws ecr get-login-password --region eu-central-1 | docker login --username AWS --password-stdin 211026995015.dkr.ecr.eu-central-1.amazonaws.com
 
   build:
     commands:
-      - echo Build started
-      - docker build -t ecs-demo .
+      - echo Building Docker image...
+      - docker build -t ecs-cicd-demo .
 
   post_build:
     commands:
-      - echo Build completed
+      - echo Tagging image...
+      - docker tag ecs-cicd-demo:latest 211026995015.dkr.ecr.eu-central-1.amazonaws.com/ecs-cicd-demo:latest
+      - echo Pushing image...
+      - docker push 211026995015.dkr.ecr.eu-central-1.amazonaws.com/ecs-cicd-demo:latest
 
 artifacts:
   files:
